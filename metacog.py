@@ -13,7 +13,7 @@
 # Metacognition by having one network look at the activations
 # of another in order to "see" how the other is thinking
 # and then map related problems somehow?  Or use known functions based
-# on that analysis of the other's congition? Dunno.
+# on that analysis of the other's cognition? Dunno.
 
 # IDEAS
 # - Use activation paths as input to the meta-network
@@ -38,7 +38,7 @@ def grabMetacogModel():
     dropout_1 = Dropout(META_DROPOUT_RATE)(output_1)
     output_2 = Dense(META_HIDDEN_SIZE, activation='relu')(dropout_1)
     dropout_2 = Dropout(META_DROPOUT_RATE)(output_2)
-    predictions = Dense(2, activation='softmax')(dropout_2)
+    predictions = Dense(META_NUMBER_FUNCTION_CLASSES, activation='softmax')(dropout_2)
     model = Model(inputs=inputs, outputs=predictions)
     opt = Adam(learning_rate=META_LEARNING_RATE)
     # opt = SGD(lr=META_LEARNING_RATE)
@@ -53,9 +53,15 @@ def grabMetacogModel():
 
 if __name__ == "__main__":
     meta_dataset, meta_dataset_labels = loadH5Dataset(META_DATASET_FILENAME)
+    meta_dataset_validation, meta_dataset_validation_labels = loadH5Dataset(META_DATASET_VALIDATION_FILENAME)
     metacog = grabMetacogModel()
-    metacog.fit(meta_dataset, meta_dataset_labels, batch_size=META_BATCH_SIZE, validation_split=.25, epochs=META_EPOCHS)
-    print metacog.predict(meta_dataset)
+    #metacog.fit(meta_dataset, meta_dataset_labels, batch_size=META_BATCH_SIZE, validation_split=.25, epochs=META_EPOCHS)
+    metacog.fit(meta_dataset, meta_dataset_labels,
+                batch_size=META_BATCH_SIZE,
+                validation_data=(meta_dataset_validation, meta_dataset_validation_labels),
+                epochs=META_EPOCHS,
+                shuffle="batch")
+    #print metacog.predict(meta_dataset)
 
 
 
